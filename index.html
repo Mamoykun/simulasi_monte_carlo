@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Queue Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .control-button {
+            background: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .control-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .control-button.start {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .counters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .counter {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .counter.busy {
+            background: linear-gradient(135deg, #fff 0%, #f9f9f9 100%);
+            border-left: 4px solid #2196F3;
+        }
+
+        .counter h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            font-size: 0.8em;
+            padding: 5px 10px;
+            border-radius: 15px;
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-badge.busy {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .customer-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 3px solid #2196F3;
+        }
+
+        .timer {
+            color: #f44336;
+            font-size: 1.1em;
+            font-weight: 500;
+            margin: 10px 0;
+        }
+
+        .queue-display {
+            background: #e3f2fd;
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 15px;
+            position: relative;
+        }
+
+        .queue-bar {
+            position: absolute;
+            height: 100%;
+            background: #2196F3;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .stats {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .stats h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            color: #2196F3;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .service-history {
+            margin-top: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .service-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .service-table th,
+        .service-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .service-table th {
+            background-color: #f8f9fa;
+            color: #1e3c72;
+        }
+
+        .service-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .finish-button {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .finish-button:hover {
+            background: #d32f2f;
+        }
+
+        .finish-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+
+            .counter {
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>Queue Management System</h1>
+            <p>Welcome to our service center</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="controls">
+            <button onclick="startSimulation()" id="startBtn" class="control-button start">
+                Start System
+            </button>
+            <button onclick="joinQueue(1)" id="queue1Btn" class="control-button">
+                Get Regular Service Ticket
+                <small>(Counter 1-3)</small>
+            </button>
+            <button onclick="joinQueue(2)" id="queue2Btn" class="control-button">
+                Get Submission Counter
+                <small>(Counter 4)</small>
+            </button>
+            <button onclick="joinQueue(3)" id="queue3Btn" class="control-button">
+                Get Counter Service Advice/Legalization
+                <small>(Counter 5)</small>
+            </button>
+            <button onclick="joinQueue(4)" id="queue4Btn" class="control-button">
+                Get Customer Complaint/Consultation
+                <small>(Counter 6)</small>
+            </button>
+        </div>
+        
+        <div class="counters" id="counters"></div>
+        
+        <div class="stats" id="stats"></div>
+
+        <div class="service-history">
+            <h3>Service History</h3>
+            <table class="service-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Customer Name</th>
+                        <th>Counter</th>
+                        <th>Service Time</th>
+                        <th>Wait Time</th>
+                    </tr>
+                </thead>
+                <tbody id="serviceTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const NUM_COUNTERS = 6;
+        let counters = Array(NUM_COUNTERS).fill(null);
+        let queues = Array(NUM_COUNTERS).fill(0);
+        let timers = Array(NUM_COUNTERS).fill(null);
+        let currentTimes = Array(NUM_COUNTERS).fill(0);
+        let currentCustomers = Array(NUM_COUNTERS).fill(null);
+        let waitingCustomers = Array(NUM_COUNTERS).fill().map(() => []);
+        let customerCounter = 1;
+        let isRunning = false;
+        let serviceHistory = [];
+        let serviceHistoryCounter = 1;
+
+        const customerNames = [
+            "Budi", "Siti", "Andi", "Dewi", "Rudi", "Nina", "Joko", "Rina",
+            "Dani", "Lisa", "Agus", "Maya", "Hadi", "Dina", "Tono", "Sari",
+            "Yudi", "Lina", "Wati", "Dedi"
+        ];
+
+        function getRandomName() {
+            return customerNames[Math.floor(Math.random() * customerNames.length)];
+        }
+
+        function createCounterElements() {
+            const counterContainer = document.getElementById('counters');
+            for (let i = 0; i < NUM_COUNTERS; i++) {
+                const counter = document.createElement('div');
+                counter.className = 'counter';
+                counter.innerHTML = `
+                    <h3>
+                        Counter ${i + 1}
+                        <span class="status-badge" id="status${i}">Free</span>
+                    </h3>
+                    <div class="customer-info" id="customer${i}"></div>
+                    <div class="timer" id="timer${i}">Time remaining: 00:00</div>
+                    <div>Waiting: <span id="queueLength${i}">0</span></div>
+                    <div class="queue-display">
+                        <div class="queue-bar" id="queueVisual${i}"></div>
+                    </div>
+                    <button onclick="finishService(${i})" id="finishBtn${i}" class="finish-button" disabled>
+                        Finish Service
+                    </button>
+                `;
+                counterContainer.appendChild(counter);
+            }
+        }
+
+        function joinQueue(type) {
+            if (!isRunning) return;
+
+            let targetCounter;
+            
+            switch(type) {
+                case 1: // Regular service (Counters 1-3)
+                    targetCounter = (customerCounter - 1) % 3;
+                    
+                    if (queues[targetCounter] >= 5) {
+                        targetCounter = (targetCounter + 1) % 3;
+                        if (queues[targetCounter] >= 5) {
+                            targetCounter = (targetCounter + 1) % 3;
+                            if (queues[targetCounter] >= 5) {
+                                alert("All regular service counters are full. Please wait.");
+                                return;
+                            }
+                        }
+                    }
+                    break;
+                    
+                case 2: // Submission Counter (Counter 4)
+                    targetCounter = 3;
+                    if (queues[targetCounter] >= 5) {
+                        alert("Submission counter is full. Please wait.");
+                        return;
+                    }
+                    break;
+                    
+                case 3: // Service Advice/Legalization (Counter 5)
+                    targetCounter = 4;
+                    if (queues[targetCounter] >= 5) {
+                        alert("Service Advice/Legalization counter is full. Please wait.");
+                        return;
+                    }
+                    break;
+                    
+                case 4: // Customer Complaint/Consultation (Counter 6)
+                    targetCounter = 5;
+                    if (queues[targetCounter] >= 5) {
+                        alert("Customer Complaint/Consultation counter is full. Please wait.");
+                        return;
+                    }
+                    break;
+            }
+
+            const newCustomer = {
+                id: customerCounter++,
+                name: getRandomName(),
+                joinTime: Date.now(),
+                queueStartTime: Date.now()
+            };
+
+            queues[targetCounter]++;
+            waitingCustomers[targetCounter].push(newCustomer);
+            
+            if (!counters[targetCounter]) {
+                processCustomer(targetCounter);
+            }
+            
+            updateCounterDisplay();
+            updateStats();
+        }
+
+        function startService(counterId) {
+            counters[counterId] = true;
+            currentTimes[counterId] = 0;
+            
+            if (!currentCustomers[counterId]) {
+                const nextCustomer = waitingCustomers[counterId].shift();
+                if (nextCustomer) {
+                    nextCustomer.startTime = Date.now();
+                    currentCustomers[counterId] = nextCustomer;
+                } else {
+                    return;
+                }
+            }
+            
+            document.getElementById(`finishBtn${counterId}`).disabled = false;
+            
+            timers[counterId] = setInterval(() => {
+                currentTimes[counterId]++;
+                updateTimer(counterId);
+            }, 1000);
+        }
+
+        function finishService(counterId) {
+            if (!counters[counterId] || !currentCustomers[counterId]) return;
+
+            const customer = currentCustomers[counterId];
+            const endTime = Date.now();
+            const serviceTime = Math.round((endTime - customer.startTime) / 1000);
+            const waitTime = Math.round((customer.startTime - customer.joinTime) / 1000);
+
+            serviceHistory.push({
+                no: serviceHistoryCounter++,
+                name: customer.name,
+                counter: counterId + 1,
+                serviceTime: serviceTime,
+                waitTime: waitTime
+            });
+
+            updateServiceTable();
+
+            clearInterval(timers[counterId]);
+            counters[counterId] = null;
+            currentCustomers[counterId] = null;
+            document.getElementById(`finishBtn${counterId}`).disabled = true;
+            
+            processCustomer(counterId);
+            updateCounterDisplay();
+            updateTimer(counterId);
+        }
+
+        function processCustomer(counterId) {
+            if (queues[counterId] > 0 && waitingCustomers[counterId].length > 0) {
+                queues[counterId]--;
+                startService(counterId);
+            } else {
+                counters[counterId] = null;
+                clearInterval(timers[counterId]);
+                updateTimer(counterId);
+            }
+            updateCounterDisplay();
+        }
+
+        function updateServiceTable() {
+            const tableBody = document.getElementById('serviceTableBody');
+            tableBody.innerHTML = serviceHistory.map(service => `
+                <tr>
+                    <td>${service.no}</td>
+                    <td>${service.name}</td>
+                    <td>${service.counter}</td>
+                    <td>${formatTime(service.serviceTime)}</td>
+                    <td>${formatTime(service.waitTime)}</td>
+                </tr>
+            `).join('');
+        }
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateCounterDisplay() {
+            for (let i = 0; i < NUM_COUNTERS; i++) {
+                const statusElement = document.getElementById(`status${i}`);
+                const counterElement = document.getElementById(`status${i}`).closest('.counter');
+                
+                if (counters[i]) {
+                    statusElement.textContent = 'Busy';
+                    statusElement.className = 'status-badge busy';
+                    counterElement.className = 'counter busy';
+                } else {
+                    statusElement.textContent = 'Free';
+                    statusElement.className = 'status-badge';
+                    counterElement.className = 'counter';
+                }
+                
+                document.getElementById(`queueLength${i}`).textContent = queues[i];
+                document.getElementById(`queueVisual${i}`).style.width = 
+                    `${(queues[i] / 5) * 100}%`;
+            }
+        }
+
+        function updateTimer(counterId) {
+            const timerElement = document.getElementById(`timer${counterId}`);
+            const customerElement = document.getElementById(`customer${counterId}`);
+            
+            if (counters[counterId] && currentCustomers[counterId]) {
+                const elapsedTime = currentTimes[counterId];
+                const minutes = Math.floor(elapsedTime / 60);
+                const seconds = elapsedTime % 60;
+                timerElement.textContent = `Time elapsed: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                const waitTime = Math.round((currentCustomers[counterId].startTime - currentCustomers[counterId].joinTime) / 1000);
+                customerElement.textContent = `Serving: Customer ${currentCustomers[counterId].id} (${currentCustomers[counterId].name})
+Wait time: ${formatTime(waitTime)}`;
+            } else {
+                timerElement.textContent = 'Time elapsed: 00:00';
+                customerElement.textContent = '';
+            }
+        }
+
+        function updateStats() {
+            let totalWaitTime = 0;
+            let totalServiceTime = 0;
+            let servedCustomers = serviceHistory.length;
+
+            serviceHistory.forEach(service => {
+                totalWaitTime += service.waitTime;
+                totalServiceTime += service.serviceTime;
+            });
+
+            const avgWaitTime = servedCustomers > 0 ? totalWaitTime / servedCustomers : 0;
+            const avgServiceTime = servedCustomers > 0 ? totalServiceTime / servedCustomers : 0;
+
+            const statsDiv = document.getElementById('stats');
+            statsDiv.innerHTML = `
+                <h3>Real-time Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">${servedCustomers}</div>
+                        <div class="stat-label">Total Customers Served</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${formatTime(Math.round(avgWaitTime))}</div>
+                        <div class="stat-label">Average Wait Time</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${formatTime(Math.round(avgServiceTime))}</div>
+                        <div class="stat-label">Average Service Time</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${Math.max(...queues)}</div>
+                        <div class="stat-label">Max Queue Length</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function startSimulation() {
+            isRunning = true;
+            document.getElementById('startBtn').disabled = true;
+            
+            for (let i = 0; i < NUM_COUNTERS; i++) {
+                processCustomer(i);
+            }
+        }
+
+        // Initialize the simulation
+        createCounterElements();
+        updateCounterDisplay();
+        updateStats();
+    </script>
+</body>
+</html>
