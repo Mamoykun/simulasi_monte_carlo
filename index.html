@@ -438,32 +438,33 @@
         }
 
         function finishService(counterId) {
-            if (!counters[counterId] || !currentCustomers[counterId]) return;
+    if (!counters[counterId] || !currentCustomers[counterId]) return;
 
-            const customer = currentCustomers[counterId];
-            const endTime = Date.now();
-            const serviceTime = Math.round((endTime - customer.startTime) / 1000);
-            const waitTime = Math.round((customer.startTime - customer.joinTime) / 1000);
+    const customer = currentCustomers[counterId];
+    const endTime = Date.now();
+    const serviceTime = Math.round((endTime - customer.startTime) / 1000);
+    const waitTime = Math.round((customer.startTime - customer.joinTime) / 1000);
 
-            serviceHistory.push({
-                no: serviceHistoryCounter++,
-                name: customer.name,
-                counter: counterId + 1,
-                serviceTime: serviceTime,
-                waitTime: waitTime
-            });
+    serviceHistory.push({
+        no: serviceHistoryCounter++,
+        name: customer.name,
+        counter: counterId + 1,
+        serviceTime: serviceTime,
+        waitTime: waitTime
+    });
 
-            updateServiceTable();
+    updateServiceTable();
+    updateStats(); // Tambahkan baris ini
 
-            clearInterval(timers[counterId]);
-            counters[counterId] = null;
-            currentCustomers[counterId] = null;
-            document.getElementById(`finishBtn${counterId}`).disabled = true;
-            
-            processCustomer(counterId);
-            updateCounterDisplay();
-            updateTimer(counterId);
-        }
+    clearInterval(timers[counterId]);
+    counters[counterId] = null;
+    currentCustomers[counterId] = null;
+    document.getElementById(`finishBtn${counterId}`).disabled = true;
+    
+    processCustomer(counterId);
+    updateCounterDisplay();
+    updateTimer(counterId);
+}
 
         function processCustomer(counterId) {
             if (queues[counterId] > 0 && waitingCustomers[counterId].length > 0) {
